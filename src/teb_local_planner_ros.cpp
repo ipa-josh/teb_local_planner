@@ -254,7 +254,14 @@ bool TebLocalPlannerROS::computeVelocityCommands(geometry_msgs::Twist& cmd_vel)
   double dx = global_goal.getOrigin().getX() - robot_pose_.x();
   double dy = global_goal.getOrigin().getY() - robot_pose_.y();
   double delta_orient = g2o::normalize_theta( tf::getYaw(global_goal.getRotation()) - robot_pose_.theta() );
-  if(fabs(std::sqrt(dx*dx+dy*dy)) < cfg_.goal_tolerance.xy_goal_tolerance
+  
+  double dir_x = cos(tf::getYaw(global_goal.getRotation()));
+  double dir_y = sin(tf::getYaw(global_goal.getRotation()));
+  
+  if(
+    fabs(dir_x*dx + dir_y*dy) < cfg_.goal_tolerance.xy_goal_tolerance &&
+    fabs(dir_y*dx - dir_x*dy) < 3*cfg_.goal_tolerance.xy_goal_tolerance
+    //fabs(std::sqrt(dx*dx+dy*dy)) < cfg_.goal_tolerance.xy_goal_tolerance
     && fabs(delta_orient) < cfg_.goal_tolerance.yaw_goal_tolerance)
   {
     goal_reached_ = true;
